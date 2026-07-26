@@ -12,6 +12,9 @@
             [clojure.pprint :as pp]
             [kotoba.statement-fetch :as sf]
             [kotoba.statement-fetch.agent-browser :as ab]
+            [kotoba.statement-fetch.api :as api]
+            [kotoba.statement-fetch.connector :as connector]
+            [kotoba.statement-fetch.oauth :as oauth]
             ["node:fs" :as fs]
             ["node:path" :as path]))
 
@@ -28,6 +31,25 @@
        (filter #(str/ends-with? % ".edn"))
        sort
        vec))
+
+(defn- providers-dir []
+  (path/join (path/dirname (institutions-dir)) "providers"))
+
+(defn- provider-files []
+  (->> (fs/readdirSync (providers-dir))
+       (filter #(str/ends-with? % ".edn"))
+       sort vec))
+
+(defn- read-edn [p]
+  (edn/read-string (fs/readFileSync p "utf8")))
+
+(defn- load-provider [name']
+  (let [file (if (str/ends-with? name' ".edn") name' (str name' ".edn"))
+        p (path/join (providers-dir) file)]
+    (when-not (fs/existsSync p)
+      (throw (ex-info (str "no such provider: " file)
+                      {:available (provider-files)})))
+    (connector/validate-provider (read-edn p))))
 
 (defn- load-flow [name']
   (let [dir  (institutions-dir)
@@ -92,6 +114,63 @@
     (println ";; url:" url)
     (println snap)))
 
+(defn cmd-connectors []
+  (doseq [f (provider-files)
+          :let [provider (load-provider f)]]
+    (println (str (pad (str/replace f ".edn" "") 28)
+                  (pad (name (:provider/kind provider)) 12)
+                  (name (:auth/kind provider)) " · "
+                  (name (:provider/setup provider))))))
+
+(defn cmd-auth-plan [name' opts]
+  (when-not (:connection opts)
+    (throw (ex-info "auth-plan requires --connection REGISTRATION.edn" {})))
+  (let [registration (read-edn (:connection opts))]
+    (pp/pprint
+     (connector/authorization-plan
+      (load-provider name') registration
+      {:state (:state opts) :redirect-uri (:redirect-uri opts)}))))
+
+(defn cmd-normalize [opts]
+  (doseq [required [:connection :snapshot :out]]
+    (when-not (get opts required)
+      (throw (ex-info (str "normalize requires --" (name required)) {}))))
+  (let [result (connector/normalize-snapshot
+                (read-edn (:connection opts))
+                (read-edn (:snapshot opts)))]
+    (fs/writeFileSync (:out opts) (pr-str result)
+                      #js {:encoding "utf8" :mode 384})
+    (println "✓ normalized →" (:out opts))))
+
+(defn cmd-oauth-exchange [name' opts]
+  (let [provider (load-provider name')]
+    (when-not (= :oauth2 (:auth/kind provider))
+      (throw (ex-info "Provider does not use OAuth2" {})))
+    (-> (oauth/exchange!
+         provider
+         {:code-env (:code-env opts)
+          :expected-state (:expected-state opts)
+          :returned-state (:returned-state opts)
+          :redirect-uri (:redirect-uri opts)
+          :token-out (:token-out opts)
+          :approved? (= "true" (:approve opts))})
+        (.then #(println "✓ OAuth token stored with mode 0600 at"
+                         (:auth/token-file %)))
+        (.catch (fn [error]
+                  (println "✗ OAuth exchange failed:" (.-message error))
+                  (js/process.exit 1))))))
+
+(defn cmd-api-fetch [name' opts]
+  (-> (api/fetch-readonly!
+       (load-provider name')
+       {:path (:path opts) :out (:out opts) :token-file (:token-file opts)
+        :approved? (= "true" (:approve opts))})
+      (.then #(println "✓ provider snapshot stored with mode 0600 at"
+                       (:api/output %)))
+      (.catch (fn [error]
+                (println "✗ API fetch failed:" (.-message error))
+                (js/process.exit 1)))))
+
 (let [[cmd & args] (vec *command-line-args*)
       opts (parse-opts (if (and (seq args) (not (str/starts-with? (first args) "--")))
                          (rest args) args))
@@ -102,5 +181,10 @@
     "plan"     (cmd-plan target opts)
     "fetch"    (cmd-fetch target opts)
     "discover" (cmd-discover opts)
-    (do (println "usage: list | verify <flow> | plan <flow> | fetch <flow> | discover")
+    "connectors" (cmd-connectors)
+    "auth-plan" (cmd-auth-plan target opts)
+    "oauth-exchange" (cmd-oauth-exchange target opts)
+    "api-fetch" (cmd-api-fetch target opts)
+    "normalize" (cmd-normalize opts)
+    (do (println "usage: list | verify <flow> | plan <flow> | fetch <flow> | discover | connectors | auth-plan <provider> | oauth-exchange <provider> | api-fetch <provider> | normalize")
         (js/process.exit 1))))

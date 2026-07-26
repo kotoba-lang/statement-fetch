@@ -53,6 +53,95 @@ enough to be an account number, since this repository is public.
 Rakuten has no `*-en` flow on purpose: its English documents are phone-request
 only and arrive by post in 1–10 days, so no browser flow can produce one.
 
+## Personal, corporate, and crypto connections
+
+`resources/providers/` contains public, secret-free connector definitions.
+Local registration EDN separates the legal owner from the asset:
+
+```clojure
+{:connection/id :personal/main-bank
+ :owner/kind :personal
+ :owner/ref :owner/self
+ :asset/kind :bank
+ :provider/id :bank/browser}
+
+{:connection/id :company/accounting
+ :owner/kind :corporate
+ :owner/ref :org/example
+ :asset/kind :accounting
+ :provider/id :moneyforward/cloud}
+
+{:connection/id :personal/crypto
+ :owner/kind :personal
+ :owner/ref :owner/self
+ :asset/kind :crypto
+ :provider/id :bitflyer/readonly}
+```
+
+Keep registrations under a private local control directory. Account numbers,
+wallet addresses, payees, tokens, API keys, and snapshots are runtime data and
+must not enter this public repository.
+
+```bash
+nbb --classpath src:bin:resources bin/statement_fetch.cljs connectors
+nbb --classpath src:bin:resources bin/statement_fetch.cljs auth-plan \
+  moneyforward-cloud --connection private/company.edn \
+  --state RANDOM_CALLBACK_STATE --redirect-uri http://127.0.0.1:8787/callback
+nbb --classpath src:bin:resources bin/statement_fetch.cljs normalize \
+  --connection private/company.edn --snapshot state/provider.edn \
+  --out state/normalized.snapshot.edn
+```
+
+After the operator consents and the local callback verifies the returned
+`state`, exchange the code without placing credentials in argv or logs:
+
+```bash
+export FINANCE_OAUTH_CODE='code-from-local-callback'
+nbb --classpath src:bin:resources bin/statement_fetch.cljs oauth-exchange \
+  moneyforward-cloud \
+  --code-env FINANCE_OAUTH_CODE \
+  --expected-state "$EXPECTED_STATE" --returned-state "$RETURNED_STATE" \
+  --redirect-uri http://127.0.0.1:8787/callback \
+  --token-out state/moneyforward.token.json --approve true
+```
+
+The provider definition names the client-id/client-secret environment
+variables. The command never prints the code or token and stores the token
+owner-readable only (mode `0600`). A separate local callback handler must
+capture `code` and `state`; embedded WebViews are not assumed.
+
+Fetch only an allowlisted read endpoint:
+
+```bash
+nbb --classpath src:bin:resources bin/statement_fetch.cljs api-fetch \
+  bitflyer-readonly --path /v1/me/getbalance \
+  --out state/bitflyer-balance.snapshot.edn --approve true
+
+nbb --classpath src:bin:resources bin/statement_fetch.cljs api-fetch \
+  moneyforward-cloud --path /v2/tenant \
+  --token-file state/moneyforward.token.json \
+  --out state/moneyforward-tenant.snapshot.edn --approve true
+```
+
+`api-fetch` always constructs `GET`, rejects paths absent from the provider
+allowlist, and writes an owner-readable snapshot. The bitFlyer adapter signs
+the exact timestamp + method + path + body sequence with HMAC-SHA256 as
+specified by its official API; it has no order, transfer, or withdrawal path.
+
+OAuth plans require the provider's application portal registration and an
+operator consent step. HMAC/API-key plans require a key created with read-only
+permissions. The connector validator permits only explicitly allowlisted GET
+paths; transfers, withdrawals, trades, and accounting writes are outside this
+capability.
+
+Money Forward Cloud requires an App Portal registration and supports OAuth 2.0
+authorization-code flow or API-key-to-short-lived-JWT exchange depending on
+the endpoint. freee requires application registration and OAuth consent.
+bitFlyer uses API key plus HMAC-SHA256; create a dedicated read-only key and
+verify its permissions before ingestion. These registrations are operator
+procedures—Tamaki may remind and observe them, but cannot approve consent or
+expand scopes.
+
 ## Verified vs unverified
 
 A flow starts life with `:step/unverified true` on every selector nobody has

@@ -3,3 +3,7 @@ node_modules/
 .cpcache/
 out/
 *.pdf
+/private/
+/state/
+*.token.edn
+*.snapshot.edn
