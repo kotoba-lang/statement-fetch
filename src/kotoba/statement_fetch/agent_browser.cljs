@@ -8,7 +8,7 @@
 
   The driver cannot type a credential: `:handoff` steps compile to no argv at
   all, and the core refuses to compile a flow that carries one."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kotoba.statement-fetch :as sf]
             ["node:child_process" :as cp]
             ["node:fs" :as fs]))
