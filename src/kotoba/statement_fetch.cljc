@@ -16,7 +16,7 @@
   control returns to a human operator who authenticates through their own
   password manager, and the driver resumes only once the operator confirms.
   The agent never observes the credential."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 ;; ---------------------------------------------------------------------------
 ;; Safety
