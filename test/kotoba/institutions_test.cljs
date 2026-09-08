@@ -3,7 +3,7 @@
   safety invariant — not just the hand-written fixtures in the core test."
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [kotoba.statement-fetch :as sf]
             ["node:fs" :as fs]
             ["node:path" :as path]))

@@ -8,7 +8,7 @@
     nbb bin/statement_fetch.cljs fetch  <flow> --from … --to … --out … [--profile Default]
     nbb bin/statement_fetch.cljs discover [--profile Default]"
   (:require [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [clojure.pprint :as pp]
             [kotoba.statement-fetch :as sf]
             [kotoba.statement-fetch.agent-browser :as ab]
