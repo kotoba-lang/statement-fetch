@@ -4,7 +4,7 @@
   Registrations may describe personal, corporate, or trust owners and bank,
   accounting, brokerage, or crypto accounts. They contain environment-variable
   *names*, never credential values."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (def owner-kinds #{:personal :corporate :trust})
 (def asset-kinds #{:bank :accounting :brokerage :crypto})
