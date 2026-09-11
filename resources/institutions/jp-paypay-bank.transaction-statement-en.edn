@@ -15,7 +15,7 @@
 ;; Unverified:
 ;;   - every post-login step. They are marked `:step/unverified true` and must
 ;;     be replaced from a discovery run before this flow is trusted. See
-;;     `bin/statement_fetch.cljs discover`.
+;;     `bin/statement_fetch.cljk discover`.
 ;;
 ;; Fee/availability note (公式ページ現行記載, 2026-07-25): 取引明細書 is
 ;; 880 JPY per issuance and the English variant supports immediate PDF. Older

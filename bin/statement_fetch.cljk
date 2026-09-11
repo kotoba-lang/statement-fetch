@@ -2,11 +2,11 @@
 (ns statement-fetch
   "CLI for kotoba-lang/statement-fetch.
 
-    nbb bin/statement_fetch.cljs list
-    nbb bin/statement_fetch.cljs verify <flow>
-    nbb bin/statement_fetch.cljs plan   <flow> --from 2026-04-26 --to 2026-07-25 --out ./s.pdf
-    nbb bin/statement_fetch.cljs fetch  <flow> --from … --to … --out … [--profile Default]
-    nbb bin/statement_fetch.cljs discover [--profile Default]"
+    nbb bin/statement_fetch.cljk list
+    nbb bin/statement_fetch.cljk verify <flow>
+    nbb bin/statement_fetch.cljk plan   <flow> --from 2026-04-26 --to 2026-07-25 --out ./s.pdf
+    nbb bin/statement_fetch.cljk fetch  <flow> --from … --to … --out … [--profile Default]
+    nbb bin/statement_fetch.cljk discover [--profile Default]"
   (:require [clojure.edn :as edn]
             [kotoba.lang.text :as str]
             [clojure.pprint :as pp]
