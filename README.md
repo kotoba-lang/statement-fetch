@@ -83,11 +83,11 @@ wallet addresses, payees, tokens, API keys, and snapshots are runtime data and
 must not enter this public repository.
 
 ```bash
-nbb --classpath src:bin:resources bin/statement_fetch.cljk connectors
-nbb --classpath src:bin:resources bin/statement_fetch.cljk auth-plan \
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk connectors
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk auth-plan \
   moneyforward-cloud --connection private/company.edn \
   --state RANDOM_CALLBACK_STATE --redirect-uri http://127.0.0.1:8787/callback
-nbb --classpath src:bin:resources bin/statement_fetch.cljk normalize \
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk normalize \
   --connection private/company.edn --snapshot state/provider.edn \
   --out state/normalized.snapshot.edn
 ```
@@ -97,7 +97,7 @@ After the operator consents and the local callback verifies the returned
 
 ```bash
 export FINANCE_OAUTH_CODE='code-from-local-callback'
-nbb --classpath src:bin:resources bin/statement_fetch.cljk oauth-exchange \
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk oauth-exchange \
   moneyforward-cloud \
   --code-env FINANCE_OAUTH_CODE \
   --expected-state "$EXPECTED_STATE" --returned-state "$RETURNED_STATE" \
@@ -113,11 +113,11 @@ capture `code` and `state`; embedded WebViews are not assumed.
 Fetch only an allowlisted read endpoint:
 
 ```bash
-nbb --classpath src:bin:resources bin/statement_fetch.cljk api-fetch \
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk api-fetch \
   bitflyer-readonly --path /v1/me/getbalance \
   --out state/bitflyer-balance.snapshot.edn --approve true
 
-nbb --classpath src:bin:resources bin/statement_fetch.cljk api-fetch \
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk api-fetch \
   moneyforward-cloud --path /v2/tenant \
   --token-file state/moneyforward.token.json \
   --out state/moneyforward-tenant.snapshot.edn --approve true
@@ -151,9 +151,9 @@ selector on a banking page is not a harmless miss.
 Promoting a flow to verified:
 
 ```bash
-nbb --classpath src:bin:resources bin/statement_fetch.cljk verify <flow>
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk verify <flow>
 # authenticate in the browser yourself, then:
-nbb --classpath src:bin:resources bin/statement_fetch.cljk discover --profile Default
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk discover --profile Default
 # replace the guessed selectors in resources/institutions/<flow>.edn, drop
 # :step/unverified, and re-run verify
 ```
@@ -167,11 +167,11 @@ and resolve through `jnb_tologin()`, so the URL is not scrapeable from markup.
 ## Usage
 
 ```bash
-nbb --classpath src:bin:resources bin/statement_fetch.cljk list
-nbb --classpath src:bin:resources bin/statement_fetch.cljk verify jp-paypay-bank.transaction-statement-en
-nbb --classpath src:bin:resources bin/statement_fetch.cljk plan  jp-paypay-bank.transaction-statement-en \
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk list
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk verify jp-paypay-bank.transaction-statement-en
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk plan  jp-paypay-bank.transaction-statement-en \
   --from 2026-04-26 --to 2026-07-25 --out ./statement.pdf
-nbb --classpath src:bin:resources bin/statement_fetch.cljk fetch jp-paypay-bank.transaction-statement-en \
+kbb --backend sci --classpath src:bin:resources bin/statement_fetch.cljk fetch jp-paypay-bank.transaction-statement-en \
   --from 2026-04-26 --to 2026-07-25 --out ./statement.pdf --profile Default
 ```
 
@@ -191,7 +191,7 @@ flow runs against.
 ## Tests
 
 ```bash
-nbb --classpath src:test:resources test/run_tests.cljk
+kbb --backend sci --classpath src:test:resources test/run_tests.cljk
 ```
 
 ## Adding an institution
