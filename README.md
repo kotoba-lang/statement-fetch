@@ -10,10 +10,10 @@ over through a logged-in web UI.
 
 ```
 resources/institutions/*.edn   what to click, per institution — data, not code
-src/kotoba/statement_fetch.cljc      pure: validate a flow, compile it to argv
+src/kotoba/statement_fetch.cljk      pure: validate a flow, compile it to argv
 src/kotoba/statement_fetch/
   agent_browser.cljs                 nbb driver: spawn agent-browser, poll, report
-bin/statement_fetch.cljs             CLI
+bin/statement_fetch.cljk             CLI
 ```
 
 ## The safety property
@@ -38,8 +38,8 @@ manager. The driver watches for a completion marker (`ログアウト` appearing
 the page) and resumes on its own. It never reads, stores, autofills, or
 transmits the credential.
 
-`test/kotoba/statement_fetch_test.cljc` asserts each of these, and
-`test/kotoba/institutions_test.cljs` re-asserts them against every institution
+`test/kotoba/statement_fetch_test.cljk` asserts each of these, and
+`test/kotoba/institutions_test.cljk` re-asserts them against every institution
 file actually shipped here — including that none contains a digit run long
 enough to be an account number, since this repository is public.
 
@@ -83,11 +83,11 @@ wallet addresses, payees, tokens, API keys, and snapshots are runtime data and
 must not enter this public repository.
 
 ```bash
-nbb --classpath src:bin:resources bin/statement_fetch.cljs connectors
-nbb --classpath src:bin:resources bin/statement_fetch.cljs auth-plan \
+nbb --classpath src:bin:resources bin/statement_fetch.cljk connectors
+nbb --classpath src:bin:resources bin/statement_fetch.cljk auth-plan \
   moneyforward-cloud --connection private/company.edn \
   --state RANDOM_CALLBACK_STATE --redirect-uri http://127.0.0.1:8787/callback
-nbb --classpath src:bin:resources bin/statement_fetch.cljs normalize \
+nbb --classpath src:bin:resources bin/statement_fetch.cljk normalize \
   --connection private/company.edn --snapshot state/provider.edn \
   --out state/normalized.snapshot.edn
 ```
@@ -97,7 +97,7 @@ After the operator consents and the local callback verifies the returned
 
 ```bash
 export FINANCE_OAUTH_CODE='code-from-local-callback'
-nbb --classpath src:bin:resources bin/statement_fetch.cljs oauth-exchange \
+nbb --classpath src:bin:resources bin/statement_fetch.cljk oauth-exchange \
   moneyforward-cloud \
   --code-env FINANCE_OAUTH_CODE \
   --expected-state "$EXPECTED_STATE" --returned-state "$RETURNED_STATE" \
@@ -113,11 +113,11 @@ capture `code` and `state`; embedded WebViews are not assumed.
 Fetch only an allowlisted read endpoint:
 
 ```bash
-nbb --classpath src:bin:resources bin/statement_fetch.cljs api-fetch \
+nbb --classpath src:bin:resources bin/statement_fetch.cljk api-fetch \
   bitflyer-readonly --path /v1/me/getbalance \
   --out state/bitflyer-balance.snapshot.edn --approve true
 
-nbb --classpath src:bin:resources bin/statement_fetch.cljs api-fetch \
+nbb --classpath src:bin:resources bin/statement_fetch.cljk api-fetch \
   moneyforward-cloud --path /v2/tenant \
   --token-file state/moneyforward.token.json \
   --out state/moneyforward-tenant.snapshot.edn --approve true
@@ -151,9 +151,9 @@ selector on a banking page is not a harmless miss.
 Promoting a flow to verified:
 
 ```bash
-nbb --classpath src:bin:resources bin/statement_fetch.cljs verify <flow>
+nbb --classpath src:bin:resources bin/statement_fetch.cljk verify <flow>
 # authenticate in the browser yourself, then:
-nbb --classpath src:bin:resources bin/statement_fetch.cljs discover --profile Default
+nbb --classpath src:bin:resources bin/statement_fetch.cljk discover --profile Default
 # replace the guessed selectors in resources/institutions/<flow>.edn, drop
 # :step/unverified, and re-run verify
 ```
@@ -167,11 +167,11 @@ and resolve through `jnb_tologin()`, so the URL is not scrapeable from markup.
 ## Usage
 
 ```bash
-nbb --classpath src:bin:resources bin/statement_fetch.cljs list
-nbb --classpath src:bin:resources bin/statement_fetch.cljs verify jp-paypay-bank.transaction-statement-en
-nbb --classpath src:bin:resources bin/statement_fetch.cljs plan  jp-paypay-bank.transaction-statement-en \
+nbb --classpath src:bin:resources bin/statement_fetch.cljk list
+nbb --classpath src:bin:resources bin/statement_fetch.cljk verify jp-paypay-bank.transaction-statement-en
+nbb --classpath src:bin:resources bin/statement_fetch.cljk plan  jp-paypay-bank.transaction-statement-en \
   --from 2026-04-26 --to 2026-07-25 --out ./statement.pdf
-nbb --classpath src:bin:resources bin/statement_fetch.cljs fetch jp-paypay-bank.transaction-statement-en \
+nbb --classpath src:bin:resources bin/statement_fetch.cljk fetch jp-paypay-bank.transaction-statement-en \
   --from 2026-04-26 --to 2026-07-25 --out ./statement.pdf --profile Default
 ```
 
@@ -191,7 +191,7 @@ flow runs against.
 ## Tests
 
 ```bash
-nbb --classpath src:test:resources test/run_tests.cljs
+nbb --classpath src:test:resources test/run_tests.cljk
 ```
 
 ## Adding an institution
