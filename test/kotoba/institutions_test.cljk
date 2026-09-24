@@ -1,7 +1,7 @@
 (ns kotoba.institutions-test
   "Every institution definition shipped in this repository must satisfy the
   safety invariant — not just the hand-written fixtures in the core test."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [kotoba.lang.edn :as edn]
             [kotoba.lang.text :as str]
             [kotoba.statement-fetch :as sf]

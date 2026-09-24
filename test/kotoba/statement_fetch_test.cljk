@@ -1,5 +1,5 @@
 (ns kotoba.statement-fetch-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [kotoba.statement-fetch :as sf]))
 
 (def base-flow
