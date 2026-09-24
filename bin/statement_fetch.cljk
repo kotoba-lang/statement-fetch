@@ -9,7 +9,7 @@
     kbb --backend sci bin/statement_fetch.cljk discover [--profile Default]"
   (:require [kotoba.lang.edn :as edn]
             [kotoba.lang.text :as str]
-            [clojure.pprint :as pp]
+            [kotoba.pprint :as pp]
             [kotoba.statement-fetch :as sf]
             [kotoba.statement-fetch.agent-browser :as ab]
             [kotoba.statement-fetch.api :as api]
