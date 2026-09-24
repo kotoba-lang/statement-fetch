@@ -7,7 +7,7 @@
     kbb --backend sci bin/statement_fetch.cljk plan   <flow> --from 2026-04-26 --to 2026-07-25 --out ./s.pdf
     kbb --backend sci bin/statement_fetch.cljk fetch  <flow> --from … --to … --out … [--profile Default]
     kbb --backend sci bin/statement_fetch.cljk discover [--profile Default]"
-  (:require [clojure.edn :as edn]
+  (:require [kotoba.lang.edn :as edn]
             [kotoba.lang.text :as str]
             [clojure.pprint :as pp]
             [kotoba.statement-fetch :as sf]
